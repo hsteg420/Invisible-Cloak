@@ -1,0 +1,38 @@
+import numpy as np
+import cv2
+import time
+cap=cv2.VideoCapture(0)  #Read from the web cam
+
+time.sleep(3)
+for i in range(30):
+    retval,back=cap.read()
+back=np.flip(back,axis=1)
+cap=cv2.VideoCapture(0)
+
+while (cap.isOpened()):  
+    ret,img=cap.read()
+    if ret:
+        img=np.flip(img,axis=1)
+        hsv=cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+        
+        # masks to detect red color
+        l_red = np.array([0,60,60])
+        u_red = np.array([40,255,255])
+        mask1 = cv2.inRange(hsv,l_red,u_red)
+        
+        l_red = np.array([170,60,60])
+        u_red = np.array([180,255,255])
+        mask2 = cv2.inRange(hsv,l_red,u_red)
+        mask1+=mask2
+        
+        #Replacing the red area with a mask image
+       
+        mask = cv2.morphologyEx(mask1, cv2.MORPH_OPEN, np.ones((5,5),np.uint8))
+        img[np.where(mask==255)]=back[np.where(mask==255)]
+       
+        cv2.imshow("It's Magic!",img)   #output
+    key = cv2.waitKey(1)
+    if key==ord("s"):
+        break
+cap.release()
+cv2.destroyAllWindows()
